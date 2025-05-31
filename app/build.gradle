@@ -1,0 +1,66 @@
+plugins {
+    alias(libs.plugins.android.application)
+    alias(libs.plugins.kotlin.android)
+}
+// andserver 插件
+apply plugin: 'com.yanzhenjie.andserver'
+// 注解插件
+apply plugin: 'kotlin-kapt'
+
+android {
+    namespace 'com.example.androidasserver'
+    compileSdk 35
+
+    defaultConfig {
+        applicationId "com.example.androidasserver"
+        minSdk 24
+        targetSdk 35
+        versionCode 1
+        versionName "1.0"
+        multiDexEnabled true
+        testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
+    }
+
+    buildTypes {
+        release {
+            minifyEnabled false
+            proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
+        }
+    }
+    compileOptions {
+        sourceCompatibility JavaVersion.VERSION_11
+        targetCompatibility JavaVersion.VERSION_11
+    }
+    kotlinOptions {
+        jvmTarget = '11'
+    }
+
+    buildFeatures {
+        viewBinding true
+    }
+
+}
+
+dependencies {
+    implementation "com.github.fengzhizi715.SAF-Kotlin-log:core:2.6.9"
+    // 太难用了，4.0不兼容更新，数据没显示
+//    implementation "io.github.cymchad:BaseRecyclerViewAdapterHelper4:4.1.7"
+    implementation 'com.github.liangjingkanji:BRV:1.6.1'
+    def dialogx_version = "0.0.49"
+    implementation "com.kongzue.dialogx:DialogX:${dialogx_version}"
+    // ios风格:https://github.com/kongzue/DialogX/wiki/%E4%BD%BF%E7%94%A8%E5%85%B6%E4%BB%96-DialogX%E4%B8%BB%E9%A2%98
+    implementation "com.kongzue.dialogx.style:DialogXIOSStyle:${dialogx_version}"
+    implementation 'androidx.multidex:multidex:2.0.1'
+    implementation 'com.yanzhenjie.andserver:api:2.1.12'
+    kapt 'com.yanzhenjie.andserver:processor:2.1.12'
+    implementation 'com.github.fengzhizi715.AndroidServer:core:1.3.3'
+    implementation 'com.github.fengzhizi715.AndroidServer:gson:1.3.3'
+    implementation libs.androidx.core.ktx
+    implementation libs.androidx.appcompat
+    implementation libs.material
+    implementation libs.androidx.activity
+    implementation libs.androidx.constraintlayout
+    testImplementation libs.junit
+    androidTestImplementation libs.androidx.junit
+    androidTestImplementation libs.androidx.espresso.core
+}
