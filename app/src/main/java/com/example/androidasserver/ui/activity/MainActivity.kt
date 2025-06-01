@@ -1,17 +1,25 @@
 package com.example.androidasserver.ui.activity
 
 import android.Manifest
+import android.app.ComponentCaller
+import android.app.NotificationManager
+import android.app.PendingIntent
+import android.content.Context
+import android.content.Intent
 import android.os.Bundle
 import android.view.View
 import android.widget.CompoundButton
 import android.widget.Switch
 import android.widget.TextView
+import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
 import androidx.appcompat.widget.AppCompatTextView
+import androidx.core.app.NotificationCompat
 import androidx.recyclerview.widget.RecyclerView
 import com.drake.brv.utils.linear
 import com.drake.brv.utils.setup
 import com.example.androidasserver.R
+import com.example.androidasserver.cpns.AndServerService
 import com.example.androidasserver.data.local.RouterItem
 import com.example.androidasserver.ext.checkIsCommonServicePort
 import com.example.androidasserver.ext.checkIsInt
@@ -21,11 +29,13 @@ import com.example.androidasserver.helper.LogProxyImpl
 import com.example.androidasserver.helper.endpoints
 import com.example.androidasserver.server.startHttpServer
 import com.kongzue.dialogx.dialogs.InputDialog
+import com.kongzue.dialogx.dialogs.MessageDialog
 import com.kongzue.dialogx.interfaces.OnInputDialogButtonClickListener
 import com.safframework.kotlin.coroutines.runInBackground
 import com.safframework.log.L
 import com.safframework.server.converter.gson.GsonConverter
 import com.safframework.server.core.AndroidServer
+import com.safframework.utils.NotificationUtil.Companion.CHANNEL_ID
 import com.safframework.utils.localIPAddress
 import kotlin.properties.Delegates
 
@@ -52,6 +62,31 @@ class MainActivity : AppCompatActivity() {
         setContentView(R.layout.activity_main)
         initPermissions()
         initView()
+    }
+
+    /**
+     * 在程序从状态栏切回来的时候，展示一个弹窗
+     */
+    override fun onNewIntent(intent: Intent) {
+        super.onNewIntent(intent)
+        if (intent.getBooleanExtra("FROM_NOTIFICATION", false)) {
+            showNotificationDialog()
+        }
+    }
+
+
+    /**
+     * 在程序从状态栏切换回来的时候，展示一个弹窗
+     */
+    private fun showNotificationDialog() {
+        MessageDialog.show("提示", "你从通知栏回来了", "确定");
+//        AlertDialog.Builder(this)
+//            .setTitle("提示")
+//            .setMessage("你从通知栏回来了！")
+//            .setPositiveButton("确定") { dialog, _ ->
+//                dialog.dismiss()
+//            }
+//            .show()
     }
 
     /**
@@ -119,17 +154,26 @@ class MainActivity : AppCompatActivity() {
                         if (isValidPort(inputPort)) {
                             openAndroidServerSwitch.isChecked = true
                             openHintTv.text = "Server is Opening On Port: $inputPort"
-                            // todo:
+                            // AndroidServer
                             upServer()
+                            // AndServer
+                            startService(Intent(this@MainActivity, AndServerService::class.java))
                             dialog?.dismiss()
                         } else {
                             openAndroidServerSwitch.isChecked = false
                             openHintTv.text = ""
+                            androidServer.close()
+                            // todo: 没效果,6969没关闭
+                            stopService(Intent(this@MainActivity, AndServerService::class.java))
+
                             dialog?.dismiss()
                         }
                     } else {
                         openAndroidServerSwitch.isChecked = false
                         dialog?.dismiss()
+                        androidServer.close()
+                        // todo: 6969没关闭
+                        stopService(Intent(this@MainActivity, AndServerService::class.java))
                     }
                     return true
                 }
@@ -149,7 +193,8 @@ class MainActivity : AppCompatActivity() {
     }
 
     private fun upServer() {
-        openHintTv.text = "内网IP: $localIPAddress \nAndroidServer库在${inputPort}端口提供服务"
+        openHintTv.text =
+            "内网IP: $localIPAddress\nAndroidServer库在${inputPort}端口提供服务\n6969端口也有服务"
         runInBackground {
             androidServer = AndroidServer.Builder {
                 converter {
@@ -167,7 +212,7 @@ class MainActivity : AppCompatActivity() {
             LocalNotificationHelper.justShowOneDefault(
                 this@MainActivity,
                 "Server",
-                "Start At $inputPort"
+                "Start At $inputPort and 6969"
             )
         }
     }
@@ -178,5 +223,12 @@ class MainActivity : AppCompatActivity() {
     private fun isValidPort(port: Int): Boolean {
         val commonPorts = listOf(80, 3306, 443, 22, 21, 25, 110, 143, 465, 993, 995)
         return port !in commonPorts && port in 1..65535
+    }
+
+    override fun onDestroy() {
+        androidServer.close()
+        // todo: 6969没关闭
+        stopService(Intent(this@MainActivity, AndServerService::class.java))
+        super.onDestroy()
     }
 }
