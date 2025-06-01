@@ -56,14 +56,21 @@
             <LinearLayout
                 android:layout_width="match_parent"
                 android:layout_height="match_parent"
-                android:background="#17B9EB">
+                android:background="#17B9EB"
+                android:orientation="vertical">
 
                 <Switch
-                    android:id="@+id/open_android_server_switch"
+                    android:id="@+id/open_switch"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:text="打开Server"
-                    tools:ignore="UseSwitchCompatOrMaterialXml" />
+                    android:padding="10dp"
+                    android:text="打开Server" />
+
+                <androidx.appcompat.widget.AppCompatTextView
+                    android:id="@+id/open_hint_tv"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_gravity="center_horizontal" />
             </LinearLayout>
         </androidx.cardview.widget.CardView>
 

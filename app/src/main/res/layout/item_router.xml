@@ -10,14 +10,13 @@
         android:layout_height="wrap_content"
         android:layout_gravity="center_horizontal"
         android:layout_weight="1"
-        android:textSize="18sp"
+        android:textSize="12sp"
         android:textStyle="bold" />
 
     <TextView
         android:id="@+id/router_desc_tv"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
-        android:layout_marginLeft="20dp"
         android:layout_weight="1"
-        android:textSize="18sp" />
+        android:textSize="12sp" />
 </LinearLayout>

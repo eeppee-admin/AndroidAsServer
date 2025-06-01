@@ -1,2 +1,3 @@
 - 刘强东: https://liangjingkanji.github.io/BRV/
-- 
+- 日志: https://github.com/fengzhizi715/SAF-Kotlin-log/wiki/Usage#tag
+- util: https://github.com/fengzhizi715/SAF-Kotlin-Utils/blob/master/Detail.md
