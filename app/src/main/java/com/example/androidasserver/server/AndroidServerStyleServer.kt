@@ -35,7 +35,7 @@ fun startHttpServer(context: Context, androidServer: AndroidServer) {
 //                response.sendFile(it.readBytes(), fileName, "application/octet-stream")
 //            } ?: response.setBodyText("no file found")
             // 测试Android13通过
-            File(context.getExternalFilesDir("MyFiles"), fileName).takeIf { it.exists() }?.let {
+            File(context.getExternalFilesDir("MyFiles"), fileName!!).takeIf { it.exists() }?.let {
                 response.sendFile(it.readBytes(), fileName!!, "application/octet-stream")
             } ?: response.setBodyText("no file found")
 
@@ -50,7 +50,7 @@ fun startHttpServer(context: Context, androidServer: AndroidServer) {
 //            val f = File("/sdcard/$fileName") // 旧方法
             // 以下Android13测试通过，小米10pro
             // 找到Android/data/com.example.androidasserver/files/MyFiles/deploy.cmd
-            val ff = File(context.getExternalFilesDir("MyFiles"), fileName)
+            val ff = File(context.getExternalFilesDir("MyFiles"), fileName!!)
             try {
                 val fos = FileOutputStream(ff)
                 fos.write(uploadFile.content)

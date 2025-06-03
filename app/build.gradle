@@ -1,7 +1,9 @@
 plugins {
     alias(libs.plugins.android.application)
     alias(libs.plugins.kotlin.android)
-    id 'kotlin-kapt'
+    id 'com.google.devtools.ksp'
+// https://developer.android.google.cn/build/migrate-to-ksp?hl=zh-cn#groovy
+//    id 'kotlin-kapt'
     id 'com.yanzhenjie.andserver'
 }
 apply plugin: 'com.yanzhenjie.andserver'
@@ -39,13 +41,13 @@ android {
     }
 
     buildFeatures {
-        // 没效果
-//        viewBinding true
+        viewBinding = true
     }
 
 }
 
 dependencies {
+    implementation 'com.jpeng:JPTabBar:1.4.0'
     // 执行android内置的命令
     implementation 'com.github.fengzhizi715.kcommand:core:v1.4.0'
     implementation 'com.github.fengzhizi715.kcommand:rxjava3:v1.4.0'

@@ -4,3 +4,8 @@
 - adb停止端口进程: https://blog.51cto.com/u_16213409/11505666
 - 强制停止app: adb shell am force-stop com.example.androidasserver | https://blog.51cto.com/u_16213319/12826988
 - 通知栏点击程序状态消失: https://blog.csdn.net/u012149399/article/details/49228069 | https://www.bytezonex.com/archives/kkrrJ_lS.html
+- gradle compile implementation: https://cloud.tencent.com/developer/article/1797151
+- 封装viewbinding: https://juejin.cn/post/6960922637618921503#heading-0 | https://blog.csdn.net/qq_20613731/article/details/119493989
+- lazy: https://juejin.cn/post/7057675598671380493
+- 可变参数传参: https://blog.csdn.net/qq_39420519/article/details/105749351
+- JPTabBar issue: https://github.com/peng8350/JPTabBar/issues/34

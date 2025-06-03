@@ -1,0 +1,39 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:jp="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical">
+
+    <androidx.viewpager2.widget.ViewPager2
+        android:id="@+id/view_pager"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:layout_above="@id/bottom_tab_bar"
+        android:overScrollMode="never"
+        android:scrollbars="none" />
+    <!-- 设置ViewPager在底部导航栏上方 -->
+
+    <!--    底部导航栏-->
+    <FrameLayout
+        android:id="@+id/bottom_tab_bar"
+        android:layout_width="match_parent"
+        android:layout_height="49dp"
+        android:layout_alignParentBottom="true">
+        >
+        <!-- 让底部导航栏位于父布局底部 -->
+
+        <com.jpeng.jptabbar.JPTabBar
+            android:id="@+id/jp_tab_bar"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:background="#DBF0EB"
+            jp:TabAnimate="None"
+            jp:TabIconSize="24dp"
+            jp:TabNormalColor="#DECECE"
+            jp:TabSelectColor="#181818"
+            jp:TabTextSize="12sp" />
+    </FrameLayout>
+
+
+</RelativeLayout>

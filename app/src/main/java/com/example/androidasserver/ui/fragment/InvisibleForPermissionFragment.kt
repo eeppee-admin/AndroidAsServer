@@ -6,6 +6,7 @@ import androidx.fragment.app.Fragment
 /**
  * 为了申请权限的Fragment
  */
+@Suppress("DEPRECATION")
 class InvisibleForPermissionFragment : Fragment() {
     private var callback: ((Boolean, List<String>) -> Unit)? = null
     val REQUEST_CODE = 1
