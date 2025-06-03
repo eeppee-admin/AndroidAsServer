@@ -9,3 +9,5 @@
 3. fix andserver style code
 
 # screenshot
+- 文件上传到手机
+![](./screenshot/mobile/watch_file_upload.png)

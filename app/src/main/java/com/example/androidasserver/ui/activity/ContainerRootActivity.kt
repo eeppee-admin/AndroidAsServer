@@ -1,11 +1,17 @@
 package com.example.androidasserver.ui.activity
 
+import android.os.Build
 import android.os.Bundle
+import android.widget.Toast
+import androidx.annotation.RequiresApi
 import androidx.appcompat.app.AppCompatActivity
 import androidx.fragment.app.Fragment
+import androidx.lifecycle.lifecycleScope
 import com.example.androidasserver.R
 import com.example.androidasserver.databinding.ActivityContainerBinding
 import com.example.androidasserver.ext.viewBinding
+import com.example.androidasserver.server.KtorServer
+import com.example.androidasserver.server.KtorServerV2
 import com.example.androidasserver.ui.adapter.ContainerFragmentAdapter
 import com.example.androidasserver.ui.fragment.HomeFragment
 import com.example.androidasserver.ui.fragment.SettingFragment
@@ -14,6 +20,9 @@ import com.jpeng.jptabbar.animate.AnimationType
 import com.jpeng.jptabbar.anno.NorIcons
 import com.jpeng.jptabbar.anno.SeleIcons
 import com.jpeng.jptabbar.anno.Titles
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 
 /**
  * 容器Activity
@@ -44,11 +53,55 @@ class ContainerRootActivity : AppCompatActivity(), OnTabSelectListener {
     )
 
 
+    @RequiresApi(Build.VERSION_CODES.O)
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(binding.root)
         setupTabBar()
         setupViewPager2()
+
+        //启动KtorServer
+//        lifecycleScope.launch(Dispatchers.IO) {
+//            KtorServer.start(port = 8888)
+//            withContext(Dispatchers.Main) {
+//                Toast.makeText(
+//                    this@ContainerRootActivity,
+//                    "服务器已启动",
+//                    Toast.LENGTH_SHORT
+//                ).show()
+//            }
+//        }
+
+        // 启动服务器（在后台协程中）
+        lifecycleScope.launch(Dispatchers.IO) {
+            try {
+                // 替换为你的 MongoDB 连接 URI
+                val mongoUri =
+                    "mongodb+srv://xxxvideoslover:xxxvideoslover@cluster0.5jzofcs.mongodb.net/go-im?retryWrites=true&w=majority&appName=Cluster0"
+
+                KtorServerV2.start(
+                    port = 9999,
+                    mongoUri = mongoUri,
+                    dbName = "go-im",
+                    collectionName = "users"
+                )
+
+                withContext(Dispatchers.Main) {
+                    Toast.makeText(this@ContainerRootActivity, "服务器已启动", Toast.LENGTH_SHORT)
+                        .show()
+                }
+            } catch (e: Exception) {
+                e.printStackTrace()
+                withContext(Dispatchers.Main) {
+                    Toast.makeText(
+                        this@ContainerRootActivity,
+                        "服务器启动失败: ${e.message}",
+                        Toast.LENGTH_LONG
+                    ).show()
+                }
+            }
+        }
+
     }
 
     private fun setupTabBar() {
@@ -92,5 +145,10 @@ class ContainerRootActivity : AppCompatActivity(), OnTabSelectListener {
         //        }
 
         return false
+    }
+
+    override fun onDestroy() {
+        super.onDestroy()
+        KtorServerV2.stop()
     }
 }

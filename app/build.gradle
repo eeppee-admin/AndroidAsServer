@@ -2,8 +2,6 @@ plugins {
     alias(libs.plugins.android.application)
     alias(libs.plugins.kotlin.android)
     id 'com.google.devtools.ksp'
-// https://developer.android.google.cn/build/migrate-to-ksp?hl=zh-cn#groovy
-//    id 'kotlin-kapt'
     id 'com.yanzhenjie.andserver'
     id("AndResGuard")
 }
@@ -12,8 +10,7 @@ plugins {
 //// andserver 插件
 apply plugin: 'com.yanzhenjie.andserver'
 //apply plugin: 'com.yanzhenjie.andserver'
-//// 注解插件
-//apply plugin: 'kotlin-kapt'
+
 
 andResGuard {
     onlyV3V4Sign = true
@@ -21,54 +18,7 @@ andResGuard {
     use7zip = true
     useSign = true
 }
-//
-//andResGuard {
-//    // mappingFile = file("./resource_mapping.txt")
-//    mappingFile = null
-//    use7zip = true
-//    useSign = true
-//    // 打开这个开关，会keep住所有资源的原始路径，只混淆资源的名字
-//    keepRoot = false
-//    // 设置这个值，会把arsc name列混淆成相同的名字，减少string常量池的大小
-//    fixedResName = "arg"
-//    // 打开这个开关会合并所有哈希值相同的资源，但请不要过度依赖这个功能去除去冗余资源
-//    mergeDuplicatedRes = true
-//    whiteList = [
-//            // for your icon
-//            "R.drawable.icon",
-//            // for fabric
-//            "R.string.com.crashlytics.*",
-//            // for google-services
-//            "R.string.google_app_id",
-//            "R.string.gcm_defaultSenderId",
-//            "R.string.default_web_client_id",
-//            "R.string.ga_trackingId",
-//            "R.string.firebase_database_url",
-//            "R.string.google_api_key",
-//            "R.string.google_crash_reporting_api_key"
-//    ]
-//    compressFilePattern = [
-//            "*.png",
-//            "*.jpg",
-//            "*.jpeg",
-//            "*.gif",
-//    ]
-//    sevenzip {
-//        artifact = 'com.tencent.mm:SevenZip:1.2.21'
-//        //path = "/usr/local/bin/7za"
-//    }
-//
-//    /**
-//     * 可选： 如果不设置则会默认覆盖assemble输出的apk
-//     **/
-//    // finalApkBackupPath = "${project.rootDir}/final.apk"
-//
-//    /**
-//     * 可选: 指定v1签名时生成jar文件的摘要算法
-//     * 默认值为“SHA-1”
-//     **/
-//    // digestalg = "SHA-256"
-//}
+
 
 android {
     namespace 'com.example.androidasserver'
@@ -105,20 +55,38 @@ android {
         }
     }
     compileOptions {
-        sourceCompatibility JavaVersion.VERSION_11
-        targetCompatibility JavaVersion.VERSION_11
+        sourceCompatibility JavaVersion.VERSION_21
+        targetCompatibility JavaVersion.VERSION_21
     }
     kotlinOptions {
-        jvmTarget = '11'
+        jvmTarget = '21'
     }
 
     buildFeatures {
         viewBinding = true
+        buildConfig = true
+    }
+
+    packagingOptions {
+        exclude 'META-INF/**'
     }
 
 }
 
 dependencies {
+    implementation("org.jetbrains.kotlinx:kotlinx-coroutines-core:1.6.4")
+    // MongoDB Kotlin driver dependency
+    implementation("org.mongodb:mongodb-driver-kotlin-coroutine:4.10.1")
+    // Ktor As Server
+    implementation "io.ktor:ktor-server-core:2.3.3"
+    implementation "io.ktor:ktor-server-content-negotiation:2.3.3"
+    implementation "io.ktor:ktor-serialization-gson:2.3.3"  // JSON 序列化
+    // todo: 不能使用netty, AndroidServer重复类
+//    implementation "io.ktor:ktor-server-netty:2.3.3"  // 使用 Netty 引擎
+    implementation "io.ktor:ktor-server-cio:2.3.3"  // 使用 CIO 引擎替代 Netty
+//    // MongoDB Kotlin 驱动
+//    implementation "org.mongodb.kotlin:mongodb-kotlin-client:4.9.1"
+
     implementation 'com.jpeng:JPTabBar:1.4.0'
     // 执行android内置的命令
     implementation 'com.github.fengzhizi715.kcommand:core:v1.4.0'
@@ -128,7 +96,7 @@ dependencies {
     implementation 'com.github.fengzhizi715.SAF-Kotlin-Utils:saf-kotlin-ext:v0.23'
     implementation 'com.github.fengzhizi715.SAF-Kotlin-Utils:saf-kotlin-utils:v0.23'
     implementation 'com.github.fengzhizi715.Kotlin-Coroutines-Utils:common:v1.1.8'
-    // 通知没效果
+    // 通知没效果,自己实现一个本地通知帮助类了
 //    implementation 'com.github.yangchong211.YCNotification:NotificationLib:1.0.4'
     implementation "com.github.fengzhizi715.SAF-Kotlin-log:core:2.6.9"
     // 太难用了，4.0不兼容更新，数据没显示
@@ -136,17 +104,17 @@ dependencies {
     implementation 'com.github.liangjingkanji:BRV:1.6.1'
     def dialogx_version = "0.0.49"
     implementation "com.kongzue.dialogx:DialogX:${dialogx_version}"
-    // ios风格:https://github.com/kongzue/DialogX/wiki/%E4%BD%BF%E7%94%A8%E5%85%B6%E4%BB%96-DialogX%E4%B8%BB%E9%A2%98
+    // ios风格: https://github.com/kongzue/DialogX/wiki/%E4%BD%BF%E7%94%A8%E5%85%B6%E4%BB%96-DialogX%E4%B8%BB%E9%A2%98
     implementation "com.kongzue.dialogx.style:DialogXIOSStyle:${dialogx_version}"
     implementation 'androidx.multidex:multidex:2.0.1'
     implementation 'com.yanzhenjie.andserver:api:2.1.12'
-    // 不能使用kapt: https://github.com/yanzhenjie/AndServer
+    // 不能使用kapt,使用kapt报错: https://github.com/yanzhenjie/AndServer
     annotationProcessor 'com.yanzhenjie.andserver:processor:2.1.12'
     implementation 'com.github.fengzhizi715.AndroidServer:core:1.3.3'
     implementation 'com.github.fengzhizi715.AndroidServer:gson:1.3.3'
 
 
-    // 默认
+    // 默认新建项目就有
     implementation libs.androidx.core.ktx
     implementation libs.androidx.appcompat
     implementation libs.material
