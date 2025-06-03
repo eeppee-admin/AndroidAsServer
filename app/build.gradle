@@ -5,12 +5,70 @@ plugins {
 // https://developer.android.google.cn/build/migrate-to-ksp?hl=zh-cn#groovy
 //    id 'kotlin-kapt'
     id 'com.yanzhenjie.andserver'
+    id("AndResGuard")
 }
-apply plugin: 'com.yanzhenjie.andserver'
+
+
 //// andserver 插件
+apply plugin: 'com.yanzhenjie.andserver'
 //apply plugin: 'com.yanzhenjie.andserver'
 //// 注解插件
 //apply plugin: 'kotlin-kapt'
+
+andResGuard {
+    onlyV3V4Sign = true
+    delMetaInf = true
+    use7zip = true
+    useSign = true
+}
+//
+//andResGuard {
+//    // mappingFile = file("./resource_mapping.txt")
+//    mappingFile = null
+//    use7zip = true
+//    useSign = true
+//    // 打开这个开关，会keep住所有资源的原始路径，只混淆资源的名字
+//    keepRoot = false
+//    // 设置这个值，会把arsc name列混淆成相同的名字，减少string常量池的大小
+//    fixedResName = "arg"
+//    // 打开这个开关会合并所有哈希值相同的资源，但请不要过度依赖这个功能去除去冗余资源
+//    mergeDuplicatedRes = true
+//    whiteList = [
+//            // for your icon
+//            "R.drawable.icon",
+//            // for fabric
+//            "R.string.com.crashlytics.*",
+//            // for google-services
+//            "R.string.google_app_id",
+//            "R.string.gcm_defaultSenderId",
+//            "R.string.default_web_client_id",
+//            "R.string.ga_trackingId",
+//            "R.string.firebase_database_url",
+//            "R.string.google_api_key",
+//            "R.string.google_crash_reporting_api_key"
+//    ]
+//    compressFilePattern = [
+//            "*.png",
+//            "*.jpg",
+//            "*.jpeg",
+//            "*.gif",
+//    ]
+//    sevenzip {
+//        artifact = 'com.tencent.mm:SevenZip:1.2.21'
+//        //path = "/usr/local/bin/7za"
+//    }
+//
+//    /**
+//     * 可选： 如果不设置则会默认覆盖assemble输出的apk
+//     **/
+//    // finalApkBackupPath = "${project.rootDir}/final.apk"
+//
+//    /**
+//     * 可选: 指定v1签名时生成jar文件的摘要算法
+//     * 默认值为“SHA-1”
+//     **/
+//    // digestalg = "SHA-256"
+//}
 
 android {
     namespace 'com.example.androidasserver'
@@ -22,14 +80,28 @@ android {
         targetSdk 35
         versionCode 1
         versionName "1.0"
+        // https://android-docs.cn/build/multidex
         multiDexEnabled true
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
     }
 
     buildTypes {
         release {
-            minifyEnabled false
-            proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
+            // Enables code shrinking, obfuscation, and optimization for only
+            // your project's release build type. Make sure to use a build
+            // variant with `debuggable false`.
+            minifyEnabled true
+
+            // Enables resource shrinking, which is performed by the
+            // Android Gradle plugin.
+            shrinkResources true
+
+            // Includes the default ProGuard rules files that are packaged with
+            // the Android Gradle plugin. To learn more, go to the section about
+            // R8 configuration files.
+            proguardFiles getDefaultProguardFile(
+                    'proguard-android-optimize.txt'),
+                    'proguard-rules.pro'
         }
     }
     compileOptions {

@@ -24,14 +24,14 @@ class ContainerRootActivity : AppCompatActivity(), OnTabSelectListener {
 
     @NorIcons
     private val mNormalIcons = intArrayOf(
-        R.drawable.home_nor,
-        R.drawable.home_nor,
+        R.drawable.home_normal,
+        R.drawable.setting_normal,
     )
 
     @SeleIcons
     private val mSelectedIcons = intArrayOf(
-        R.drawable.home,
-        R.drawable.home
+        R.drawable.home_selected,
+        R.drawable.setting_selected
     )
 
     private val binding: ActivityContainerBinding by viewBinding(
@@ -53,19 +53,12 @@ class ContainerRootActivity : AppCompatActivity(), OnTabSelectListener {
 
     private fun setupTabBar() {
         with(binding.jpTabBar) {
-//            setTitles(*mTitles)
-            // viewpager2 不兼容
-//            setContainer(binding.viewPager)
-//            setNormalIcons(*mNormalIcons)
-//            setSelectedIcons(*mSelectedIcons)
-//            mTabbar.setTabTypeFace("fonts/Jaden.ttf");
-//            setTabListener(this@ContainerRootActivity)
             setAnimation(AnimationType.SCALE2)
-            setGradientEnable(true)
+            setGradientEnable(false)
             // 禁用页面切换动画
             setPageAnimateEnable(false)
-//            setSelectTab(0)
-//            generate()
+            // 必须设置去监听
+            setTabListener(this@ContainerRootActivity)
         }
     }
 
@@ -89,8 +82,6 @@ class ContainerRootActivity : AppCompatActivity(), OnTabSelectListener {
 
             1 ->
                 binding.viewPager.setCurrentItem(1, false)
-
-            else -> {}
         }
     }
 

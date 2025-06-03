@@ -9,3 +9,7 @@
 - lazy: https://juejin.cn/post/7057675598671380493
 - 可变参数传参: https://blog.csdn.net/qq_39420519/article/details/105749351
 - JPTabBar issue: https://github.com/peng8350/JPTabBar/issues/34
+- 包缩减(没调试混淆等情况): https://android-docs.cn/build/shrink-code#groovy
+- multidex: https://android-docs.cn/build/multidex
+- Android5.0之后引入了VectorDrawable对SVG进行支持,其实是drawable目录不支持svg
+- AndResGuard + gralde8+: https://github.com/lalakii/AndResGuard?tab=readme-ov-file

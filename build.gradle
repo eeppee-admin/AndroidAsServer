@@ -3,8 +3,8 @@ buildscript {
         google()
         mavenCentral()
     }
-    // andserver 插件
     dependencies {
+        // andserver 插件
         classpath 'com.yanzhenjie.andserver:plugin:2.1.12'
     }
 }
@@ -13,7 +13,7 @@ plugins {
     alias(libs.plugins.android.application) apply false
     alias(libs.plugins.kotlin.android) apply false
     id 'com.google.devtools.ksp' version '2.0.21-1.0.27' apply false
-
+    id "cn.lalaki.AndResGuard" version "1.7.3-final" apply false
     //https://blog.csdn.net/yilvqingtai/article/details/134459803
 }
 
