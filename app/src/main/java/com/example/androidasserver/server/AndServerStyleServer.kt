@@ -8,7 +8,10 @@ import com.yanzhenjie.andserver.Server
 import java.lang.Exception
 import java.util.concurrent.TimeUnit
 
-//https://www.baeldung-cn.com/kotlin/val-cannot-be-reassigned-error
+/**
+ *
+ * https://www.baeldung-cn.com/kotlin/val-cannot-be-reassigned-error
+ */
 fun startAndServer(context: Context, andServer: Server) {
 //    andServer = AndServer.webServer(context)
 //        .port(port)

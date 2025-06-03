@@ -74,6 +74,9 @@ android {
 }
 
 dependencies {
+    implementation 'javax.inject:javax.inject:1'
+    // JavaMail API 用于 SMTP 邮件发送
+    implementation 'com.sun.mail:jakarta.mail:2.0.1'
     implementation("org.jetbrains.kotlinx:kotlinx-coroutines-core:1.6.4")
     // MongoDB Kotlin driver dependency
     implementation("org.mongodb:mongodb-driver-kotlin-coroutine:4.10.1")

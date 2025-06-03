@@ -5,6 +5,9 @@ import com.yanzhenjie.andserver.annotation.RequestMapping
 import com.yanzhenjie.andserver.annotation.RequestParam
 import com.yanzhenjie.andserver.annotation.RestController
 
+/**
+ * todo: AndServer Style Code
+ */
 @RestController
 @RequestMapping(path = ["/user"])
 class UserController {

@@ -9,13 +9,14 @@ import kotlin.properties.Delegates
 
 /**
  * 加载Fragment页面的适配器
+ * ref link: https://gitee.com/zhanshengshu/qloop_android/blob/cleanup/app/src/main/java/com/smiot/qloop/adapter/MainFragmentAdapter.java
  */
 class ContainerFragmentAdapter(
     fragmentManager: FragmentManager,
     lifecycle: Lifecycle, list: MutableList<Fragment>
 ) : FragmentStateAdapter(fragmentManager, lifecycle) {
-    private var mItemList: MutableList<Fragment> by Delegates.notNull() // fragment列表
-
+    // fragment列表
+    private var mItemList: MutableList<Fragment> by Delegates.notNull()
 
     init {
         mItemList = list

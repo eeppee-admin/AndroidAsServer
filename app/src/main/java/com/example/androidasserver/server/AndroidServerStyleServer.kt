@@ -14,7 +14,10 @@ import java.io.IOException
  * AndroidServer 库风格的Server
  * context是Activity Context
  */
-fun startHttpServer(context: Context, androidServer: AndroidServer) {
+fun startHttpServer(
+    context: Context,
+    androidServer: AndroidServer
+) {
     androidServer
         .get("/hello") { _, response: Response ->
             response.setBodyText("hello world")
@@ -72,7 +75,6 @@ fun startHttpServer(context: Context, androidServer: AndroidServer) {
             override fun after(request: Request, response: Response) {
                 LogManager.d("HttpService", "after....")
             }
-
         })
         .start()
 }

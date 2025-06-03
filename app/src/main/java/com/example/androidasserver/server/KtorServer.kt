@@ -2,6 +2,8 @@ package com.example.androidasserver.server
 
 import android.os.Build
 import androidx.annotation.RequiresApi
+import com.example.androidasserver.helper.EmailConfig
+import com.example.androidasserver.helper.EmailService
 import io.ktor.server.application.*
 import io.ktor.server.cio.*
 import io.ktor.server.engine.*
@@ -16,10 +18,60 @@ import java.util.*
 import javax.crypto.SecretKeyFactory
 import javax.crypto.spec.PBEKeySpec
 
+
+import java.util.concurrent.ConcurrentHashMap
+
+object VerificationCodeManager {
+    // 存储：邮箱 -> [验证码, 过期时间]
+    private val codeMap = ConcurrentHashMap<String, Pair<String, Long>>()
+    private const val EXPIRATION_TIME = 5 * 60 * 1000  // 5分钟有效期
+
+    // 保存验证码
+    fun saveCode(email: String, code: String) {
+        codeMap[email] = Pair(code, System.currentTimeMillis() + EXPIRATION_TIME)
+    }
+
+    // 验证验证码
+    fun verifyCode(email: String, inputCode: String): Boolean {
+        val entry = codeMap[email] ?: return false
+
+        // 检查是否过期
+        if (System.currentTimeMillis() > entry.second) {
+            codeMap.remove(email)
+            return false
+        }
+
+        // 验证验证码
+        val isValid = entry.first == inputCode
+        if (isValid) codeMap.remove(email)  // 验证通过后移除
+        return isValid
+    }
+
+    // 检查邮箱是否已发送验证码（防刷）
+    fun canSend(email: String): Boolean {
+        val entry = codeMap[email] ?: return true
+        return System.currentTimeMillis() > entry.second - 50000 // 剩余50秒内不能重发
+    }
+}
+
+/**
+ * 数据存储在内存的ktor 风格
+ * 登录注册
+ */
 object KtorServer {
     private var server: ApplicationEngine? = null
     private val job = Job()
     private val scope = CoroutineScope(Dispatchers.IO + job)
+
+    // 邮箱服务实例
+    private val emailService = EmailService(
+        EmailConfig(
+            username = "1690544550@qq.com",     // 替换为你的QQ邮箱
+            password = "znxogkkkexpbeeaj",    // 替换为你的SMTP授权码
+            host = "smtp.qq.com",
+            port = "587"
+        )
+    )
 
     // 用户数据存储，内存值，不是数据库
     private val users = mutableMapOf<String, User>()
@@ -30,18 +82,119 @@ object KtorServer {
             install(ContentNegotiation) {
                 gson()
             }
-
             routing {
+                // 发送验证码接口
+                post("/sendCode") {
+                    val request = call.receive<EmailRequest>()
+
+                    // 邮箱格式验证
+                    if (!isValidEmail(request.email)) {
+                        call.respond(
+                            Response(
+                                false,
+                                "邮箱格式不正确"
+                            )
+                        )
+                        return@post
+                    }
+
+                    // 防刷检查
+                    if (!VerificationCodeManager.canSend(request.email)) {
+                        call.respond(
+                            Response(
+                                false,
+                                "发送频率过高，请稍后再试"
+                            )
+                        )
+                        return@post
+                    }
+
+                    // 生成并发送验证码
+                    val code = emailService.generateVerificationCode()
+                    val isSent = emailService.sendVerificationCode(request.email, code)
+
+                    if (isSent) {
+                        VerificationCodeManager.saveCode(request.email, code)
+                        call.respond(Response(true, "验证码已发送"))
+                    } else {
+                        call.respond(
+                            Response(
+                                false,
+                                "验证码发送失败"
+                            )
+                        )
+                    }
+                }
+                // 注册接口（带验证码验证）
                 post("/register") {
-                    val request = call.receive<UserRequest>()
-                    val response = handleRegistration(request)
-                    call.respond(response)
+                    val request = call.receive<RegisterRequest>()
+                    // 验证输入
+                    if (request.username.isNullOrBlank() ||
+                        request.password.isNullOrBlank() ||
+                        request.email.isNullOrBlank() ||
+                        request.code.isNullOrBlank()
+                    ) {
+                        call.respond(Response(false, "所有字段均为必填项"))
+                        return@post
+                    }
+
+                    // 验证邮箱格式
+                    if (!isValidEmail(request.email)) {
+                        call.respond(Response(false, "邮箱格式不正确"))
+                        return@post
+                    }
+                    // 验证验证码
+                    if (!VerificationCodeManager.verifyCode(request.email, request.code)) {
+                        call.respond(Response(false, "验证码无效或已过期"))
+                        return@post
+                    }
+
+                    // 检查用户是否已存在
+                    if (users.containsKey(request.username)) {
+                        call.respond(Response(false, "用户名已存在"))
+                        return@post
+                    }
+                    // 加密密码
+                    val (hash, salt) = hashPassword(request.password)
+
+                    // 保存用户
+                    val user = User(
+                        id = UUID.randomUUID().toString(),
+                        username = request.username,
+                        email = request.email,
+                        passwordHash = hash,
+                        salt = salt,
+                        createdAt = System.currentTimeMillis()
+                    )
+                    users[request.username] = user
+
+                    call.respond(Response(true, "注册成功"))
                 }
 
+
+                // 登录接口
                 post("/login") {
-                    val request = call.receive<UserRequest>()
-                    val response = handleLogin(request)
-                    call.respond(response)
+                    val request = call.receive<LoginRequest>()
+
+                    // 验证输入
+                    if (request.username.isNullOrBlank() || request.password.isNullOrBlank()) {
+                        call.respond(Response(false, "用户名和密码不能为空"))
+                        return@post
+                    }
+
+                    // 查找用户
+                    val user = users[request.username] ?: return@post call.respond(
+                        Response(false, "用户不存在")
+                    )
+
+                    // 验证密码
+                    if (!verifyPassword(request.password, user.passwordHash, user.salt)) {
+                        call.respond(Response(false, "密码错误"))
+                        return@post
+                    }
+                    // 生成令牌
+                    val token = generateJwtToken(user.username)
+                    call.respond(LoginResponse(true, "登录成功", token))
                 }
             }
         }.start(wait = false)
@@ -51,6 +204,9 @@ object KtorServer {
         server?.stop(1000, 5000)
         job.cancel()
     }
+
+
+    // -----------------------------------------------------------------------
 
     // 处理注册逻辑
     @RequiresApi(Build.VERSION_CODES.O)
@@ -74,7 +230,8 @@ object KtorServer {
             username = request.username,
             passwordHash = hash,
             salt = salt,
-            createdAt = System.currentTimeMillis()
+            createdAt = System.currentTimeMillis(),
+            email = ""
         )
         users[request.username] = user
 
@@ -151,8 +308,19 @@ data class UserRequest(
 // 注册响应类
 data class RegistrationResponse(
     val success: Boolean,
-    val message: String
+    val message: String,
+    val email: String = "",
+    val code: String = ""
 )
+
+data class RegisterRequest(
+    val username: String,
+    val password: String,
+    val email: String,
+    val code: String
+)
+
+data class LoginRequest(val username: String, val password: String)
 
 // 登录响应类
 data class LoginResponse(
@@ -161,11 +329,24 @@ data class LoginResponse(
     val message: String? = null
 )
 
-// 用户数据类
+// 用户数据类 新增用户字段
 data class User(
     val id: String,
     val username: String,
+    val email: String,
     val passwordHash: String,
     val salt: String,
     val createdAt: Long
 )
+
+data class EmailRequest(val email: String)
+data class Response(
+    val success: Boolean,
+    val message: String
+)
+
+// 邮箱格式验证
+private fun isValidEmail(email: String): Boolean {
+    val pattern = "^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\\.[a-zA-Z]{2,6}$"
+    return email.matches(pattern.toRegex())
+}

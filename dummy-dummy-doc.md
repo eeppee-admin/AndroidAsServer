@@ -12,7 +12,8 @@
 - 包缩减(没调试混淆等情况): https://android-docs.cn/build/shrink-code#groovy
 - multidex: https://android-docs.cn/build/multidex
 - Android5.0之后引入了VectorDrawable对SVG进行支持,其实是drawable目录不支持svg
-- AndResGuard + gralde8+: https://github.com/lalakii/AndResGuard?tab=readme-ov-file
-- Mongodb Android: https://geek-docs.com/mongodb/mongodb-questions/486_mongodb_mongodb_on_android.html
-- Package Exclude: https://blog.csdn.net/liuzehn/article/details/103587571
-- Enable Build Config: https://blog.csdn.net/u013762572/article/details/140484589
+- 资源缩减AndResGuard + gralde8+: https://github.com/lalakii/AndResGuard?tab=readme-ov-file
+- Android直连Mongodb: https://geek-docs.com/mongodb/mongodb-questions/486_mongodb_mongodb_on_android.html
+- 打包排除: https://blog.csdn.net/liuzehn/article/details/103587571
+- 启用BuildConfig: https://blog.csdn.net/u013762572/article/details/140484589
+- 底部导航栏: https://www.uisdc.com/bottom-label-design

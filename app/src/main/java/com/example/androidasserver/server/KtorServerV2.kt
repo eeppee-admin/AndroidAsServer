@@ -29,7 +29,8 @@ import org.bson.conversions.Bson
 import org.bson.types.ObjectId
 
 /**
- * TODO: crash bug fix
+ * TODO: not ok with remote mongodb,
+ *  bug: met some class not founded error
  */
 
 object MongoDbManager {

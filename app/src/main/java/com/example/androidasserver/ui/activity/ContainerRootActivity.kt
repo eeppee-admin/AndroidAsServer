@@ -20,6 +20,7 @@ import com.jpeng.jptabbar.animate.AnimationType
 import com.jpeng.jptabbar.anno.NorIcons
 import com.jpeng.jptabbar.anno.SeleIcons
 import com.jpeng.jptabbar.anno.Titles
+import com.safframework.log.L
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
@@ -61,46 +62,51 @@ class ContainerRootActivity : AppCompatActivity(), OnTabSelectListener {
         setupViewPager2()
 
         //启动KtorServer
-//        lifecycleScope.launch(Dispatchers.IO) {
-//            KtorServer.start(port = 8888)
-//            withContext(Dispatchers.Main) {
-//                Toast.makeText(
-//                    this@ContainerRootActivity,
-//                    "服务器已启动",
-//                    Toast.LENGTH_SHORT
-//                ).show()
-//            }
-//        }
-
-        // 启动服务器（在后台协程中）
         lifecycleScope.launch(Dispatchers.IO) {
-            try {
-                // 替换为你的 MongoDB 连接 URI
-                val mongoUri =
-                    "mongodb+srv://xxxvideoslover:xxxvideoslover@cluster0.5jzofcs.mongodb.net/go-im?retryWrites=true&w=majority&appName=Cluster0"
-
-                KtorServerV2.start(
-                    port = 9999,
-                    mongoUri = mongoUri,
-                    dbName = "go-im",
-                    collectionName = "users"
-                )
-
-                withContext(Dispatchers.Main) {
-                    Toast.makeText(this@ContainerRootActivity, "服务器已启动", Toast.LENGTH_SHORT)
-                        .show()
-                }
-            } catch (e: Exception) {
-                e.printStackTrace()
-                withContext(Dispatchers.Main) {
-                    Toast.makeText(
-                        this@ContainerRootActivity,
-                        "服务器启动失败: ${e.message}",
-                        Toast.LENGTH_LONG
-                    ).show()
-                }
+            KtorServer.start(port = 8888)
+            withContext(Dispatchers.Main) {
+                Toast.makeText(
+                    this@ContainerRootActivity,
+                    "服务器已启动",
+                    Toast.LENGTH_SHORT
+                ).show()
             }
         }
+
+        // 启动服务器（在后台协程中）
+//        lifecycleScope.launch(Dispatchers.IO) {
+//            try {
+//                // 替换为你的 MongoDB 连接 URI
+//                val mongoUri =
+//                    "mongodb://xxxvideoslover:xxxvideoslover@cluster0.5jzofcs.mongodb.net/go-im?retryWrites=true&w=majority&appName=Cluster0"
+//
+//                val damn = KtorServerV2.start(
+//                    port = 9999,
+//                    mongoUri = mongoUri,
+//                    dbName = "go-im",
+//                    collectionName = "users"
+//                )
+//
+//                withContext(Dispatchers.Main) {
+//                    L.d("TAG", damn.toString())
+//                    Toast.makeText(
+//                        this@ContainerRootActivity,
+//                        "服务器已启动",
+//                        Toast.LENGTH_SHORT
+//                    )
+//                        .show()
+//                }
+//            } catch (e: Exception) {
+//                e.printStackTrace()
+//                withContext(Dispatchers.Main) {
+//                    Toast.makeText(
+//                        this@ContainerRootActivity,
+//                        "服务器启动失败: ${e.message}",
+//                        Toast.LENGTH_LONG
+//                    ).show()
+//                }
+//            }
+//        }
 
     }
 
