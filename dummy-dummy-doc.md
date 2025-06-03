@@ -1,4 +1,4 @@
-- 刘强东: https://liangjingkanji.github.io/BRV/
+- 刘强东: https://liangjingkanji.github.io/BRV/ | https://liangjingkanji.github.io/BRV/click.html
 - 日志: https://github.com/fengzhizi715/SAF-Kotlin-log/wiki/Usage#tag
 - util: https://github.com/fengzhizi715/SAF-Kotlin-Utils/blob/master/Detail.md
 - adb停止端口进程: https://blog.51cto.com/u_16213409/11505666
@@ -16,4 +16,5 @@
 - Android直连Mongodb: https://geek-docs.com/mongodb/mongodb-questions/486_mongodb_mongodb_on_android.html
 - 打包排除: https://blog.csdn.net/liuzehn/article/details/103587571
 - 启用BuildConfig: https://blog.csdn.net/u013762572/article/details/140484589
-- 底部导航栏: https://www.uisdc.com/bottom-label-design
+- 底部导航栏设计: https://www.uisdc.com/bottom-label-design
+- 获取debug keystore: https://blog.csdn.net/jdsjlzx/article/details/52144870

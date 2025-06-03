@@ -9,7 +9,7 @@ import com.kongzue.dialogx.style.IOSStyle
 import kotlin.properties.Delegates
 
 /**
- * App
+ * 提供MultiDex 的 App类
  */
 class ProvideMultidexServerApp : MultiDexApplication() {
     override fun onCreate() {

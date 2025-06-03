@@ -74,6 +74,18 @@ android {
 }
 
 dependencies {
+    // WXPay
+    implementation 'com.github.jenly1314.AppPay:wxpay:2.1.0'
+
+    // AliPay
+    implementation 'com.github.jenly1314.AppPay:alipay:2.1.0'
+
+    // UnionPay
+    implementation 'com.github.jenly1314.AppPay:unionpay:2.1.0'
+
+    // AppPay
+    implementation 'com.github.jenly1314.AppPay:apppay:2.1.0'
+
     implementation 'javax.inject:javax.inject:1'
     // JavaMail API 用于 SMTP 邮件发送
     implementation 'com.sun.mail:jakarta.mail:2.0.1'

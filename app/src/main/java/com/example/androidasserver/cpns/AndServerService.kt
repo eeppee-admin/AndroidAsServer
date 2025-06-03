@@ -14,7 +14,7 @@ import java.util.concurrent.TimeUnit
 import kotlin.properties.Delegates
 
 /**
- * AndServer 风格Service, 要主动去运行服务
+ * AndServer风格Service, 要主动去运行服务
  * todo: 需要广播来处理service启动停止的情况
  */
 class AndServerService : Service() {

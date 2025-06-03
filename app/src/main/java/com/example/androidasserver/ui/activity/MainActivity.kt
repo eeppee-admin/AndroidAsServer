@@ -1,65 +1,57 @@
 package com.example.androidasserver.ui.activity
 
 import android.Manifest
-import android.app.ComponentCaller
-import android.app.NotificationManager
-import android.app.PendingIntent
-import android.content.Context
 import android.content.Intent
 import android.os.Bundle
 import android.view.View
 import android.widget.CompoundButton
-import android.widget.Switch
 import android.widget.TextView
-import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
-import androidx.appcompat.widget.AppCompatTextView
-import androidx.core.app.NotificationCompat
-import androidx.recyclerview.widget.RecyclerView
 import com.drake.brv.utils.linear
 import com.drake.brv.utils.setup
 import com.example.androidasserver.R
-import com.example.androidasserver.cpns.AndServerService
 import com.example.androidasserver.data.local.RouterItem
-import com.example.androidasserver.ext.checkIsCommonServicePort
+import com.example.androidasserver.databinding.ActivityMainBinding
 import com.example.androidasserver.ext.checkIsInt
+import com.example.androidasserver.ext.viewBinding
 import com.example.androidasserver.helper.DynamicPermissionHelper
 import com.example.androidasserver.helper.LocalNotificationHelper
 import com.example.androidasserver.helper.LogProxyImpl
-import com.example.androidasserver.helper.endpoints
 import com.example.androidasserver.server.startHttpServer
+import com.king.pay.apppay.AppPay
+import com.king.pay.wxpay.WXPay
+import com.king.pay.wxpay.WXPayReq
+import com.king.pay.wxpay.WXPayResult
+import com.kongzue.dialogx.dialogs.BottomMenu
 import com.kongzue.dialogx.dialogs.InputDialog
 import com.kongzue.dialogx.dialogs.MessageDialog
+import com.kongzue.dialogx.dialogs.PopTip
 import com.kongzue.dialogx.interfaces.OnInputDialogButtonClickListener
+import com.kongzue.dialogx.interfaces.OnMenuItemClickListener
 import com.safframework.kotlin.coroutines.runInBackground
 import com.safframework.log.L
 import com.safframework.server.converter.gson.GsonConverter
 import com.safframework.server.core.AndroidServer
-import com.safframework.utils.NotificationUtil.Companion.CHANNEL_ID
 import com.safframework.utils.localIPAddress
 import kotlin.properties.Delegates
+
 
 /**
  * app主界面
  */
 class MainActivity : AppCompatActivity() {
-    private var androidServer: AndroidServer by Delegates.notNull()
-    val routerRecyclerView: RecyclerView by lazy {
-        findViewById(R.id.router_recycler_view)
-    }
+    private var androidServer: AndroidServer? = null
+    private var inputPort: Int by Delegates.notNull()
 
-    val openAndroidServerSwitch: Switch by lazy {
-        findViewById(R.id.open_switch)
-    }
+    private var mAppPay: AppPay? = null
 
-    val openHintTv: AppCompatTextView by lazy {
-        findViewById(R.id.open_hint_tv)
-    }
-    var inputPort: Int by Delegates.notNull()
+    // 使用Activity ViewBinding Ext扩展
+    private val binding: ActivityMainBinding by viewBinding(ActivityMainBinding::inflate)
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        setContentView(R.layout.activity_main)
+        setContentView(binding.root)
+        mAppPay = AppPay(this)
         initPermissions()
         initView()
     }
@@ -93,35 +85,77 @@ class MainActivity : AppCompatActivity() {
      * 初始化视图
      */
     private fun initView() {
-        L.d("TAG", RouterItem.endPoints.toString())
-        // BUG: binding 无法识别到此id?
-        routerRecyclerView.linear().setup {
-            addType<RouterItem>(R.layout.item_router)
-            onBind {
-                findView<TextView>(R.id.router_url_tv).text = getModel<RouterItem>().url
-                findView<TextView>(R.id.router_desc_tv).text = getModel<RouterItem>().desc
-            }
-        }.models = RouterItem.endPoints
-
-        // BUG: kotlin Lambda无法生效
-        openAndroidServerSwitch.setOnCheckedChangeListener(object :
-            CompoundButton.OnCheckedChangeListener {
-            override fun onCheckedChanged(
-                buttonView: CompoundButton?,
-                isChecked: Boolean
-            ) {
-                if (isChecked) {
-                    L.d("TAG", "打开了")
-                    showPortInputDialog()
-
-                } else {
-                    L.d("TAG", "关闭了")
-                    androidServer.close()
-                    openHintTv.text = ""
-                    LocalNotificationHelper.cancelNotification(this@MainActivity, 1)
+        with(binding) {
+            // BUG: binding 无法识别到此id?
+            routerRecyclerView.linear().setup {
+                addType<RouterItem>(R.layout.item_router)
+                onBind {
+                    findView<TextView>(R.id.router_url_tv).text = getModel<RouterItem>().url
+                    findView<TextView>(R.id.router_desc_tv).text = getModel<RouterItem>().desc
                 }
-            }
-        })
+                // 点击描述，弹出对话框
+                onClick(R.id.router_desc_tv, R.id.router_url_tv) {
+                    //Material 可滑动展开 BottomMenu 演示
+                    BottomMenu.build()
+                        .setTitle("底部弹窗")
+                        .setBottomDialogMaxHeight(0.6f)
+                        .setMenuList(
+                            arrayOf<String>(
+                                "复制github链接",
+                                "打开github",
+                                "给我钱?"
+                            )
+                        ).setOnMenuItemClickListener(object :
+                            OnMenuItemClickListener<BottomMenu?> {
+                            override fun onClick(
+                                dialog: BottomMenu?,
+                                text: CharSequence?,
+                                index: Int
+                            ): Boolean {
+                                PopTip.show(text)
+                                when (text) {
+                                    "打开github" -> L.d("TAG", "点击打开github")
+                                    "给我钱?" -> {
+                                        val req = WXPayReq()
+                                        req.setAppId("")
+                                        mAppPay!!.sendWXPayReq(
+                                            req,
+                                            object : WXPay.OnPayListener {
+                                                override fun onPayResult(result: WXPayResult) {
+                                                    // 支付结果
+                                                    if (result.isSuccess()) {
+                                                        // TODO 支付成功
+
+                                                        // 务必以服务端结果为准
+                                                    }
+                                                }
+                                            })
+                                    }
+                                }
+                                return false
+                            }
+                        }).show()
+                }
+            }.models = RouterItem.endPoints
+
+            // BUG: kotlin Lambda无法生效
+            openSwitch.setOnCheckedChangeListener(object :
+                CompoundButton.OnCheckedChangeListener {
+                override fun onCheckedChanged(
+                    buttonView: CompoundButton?,
+                    isChecked: Boolean
+                ) {
+                    if (isChecked) {
+                        showPortInputDialog()
+
+                    } else {
+                        androidServer?.close()
+                        openHintTv.text = ""
+                        LocalNotificationHelper.cancelNotification(this@MainActivity, 1)
+                    }
+                }
+            })
+        }
     }
 
     /**
@@ -142,7 +176,7 @@ class MainActivity : AppCompatActivity() {
      */
     private fun showPortInputDialog() {
         val dia = InputDialog("请输入端口号", "不能输入常见的端口号,如3306", "确定", "取消")
-            .setCancelable(true)
+            .setCancelable(false)
             .setOkButton(object : OnInputDialogButtonClickListener<InputDialog> {
                 override fun onClick(
                     dialog: InputDialog?,
@@ -152,28 +186,31 @@ class MainActivity : AppCompatActivity() {
                     if (inputStr?.checkIsInt() == true) {
                         inputPort = inputStr?.toIntOrNull()!!
                         if (isValidPort(inputPort)) {
-                            openAndroidServerSwitch.isChecked = true
-                            openHintTv.text = "Server is Opening On Port: $inputPort"
+                            with(binding) {
+                                openSwitch.isChecked = true
+                                openHintTv.text = "Server is Opening On Port: $inputPort"
+                            }
                             // AndroidServer
                             upServer()
                             // AndServer
-                            startService(Intent(this@MainActivity, AndServerService::class.java))
+//                            startService(Intent(this@MainActivity, AndServerService::class.java))
                             dialog?.dismiss()
                         } else {
-                            openAndroidServerSwitch.isChecked = false
-                            openHintTv.text = ""
-                            androidServer.close()
+                            with(binding) {
+                                openSwitch.isChecked = false
+                                openHintTv.text = ""
+                            }
+                            androidServer?.close()
                             // todo: 没效果,6969没关闭
-                            stopService(Intent(this@MainActivity, AndServerService::class.java))
-
+//                            stopService(Intent(this@MainActivity, AndServerService::class.java))
                             dialog?.dismiss()
                         }
                     } else {
-                        openAndroidServerSwitch.isChecked = false
-                        dialog?.dismiss()
-                        androidServer.close()
+                        binding.openSwitch.isChecked = false
+                        androidServer?.close()
                         // todo: 6969没关闭
-                        stopService(Intent(this@MainActivity, AndServerService::class.java))
+//                        stopService(Intent(this@MainActivity, AndServerService::class.java))
+                        dialog?.dismiss()
                     }
                     return true
                 }
@@ -184,7 +221,7 @@ class MainActivity : AppCompatActivity() {
                     v: View?,
                     inputStr: String?
                 ): Boolean {
-                    openAndroidServerSwitch.isChecked = false
+                    binding.openSwitch.isChecked = false
                     dialog?.dismiss()
                     return true
                 }
@@ -193,7 +230,7 @@ class MainActivity : AppCompatActivity() {
     }
 
     private fun upServer() {
-        openHintTv.text =
+        binding.openHintTv.text =
             "内网IP: $localIPAddress\nAndroidServer库在${inputPort}端口提供服务\n6969端口也有服务"
         runInBackground {
             androidServer = AndroidServer.Builder {
@@ -208,7 +245,7 @@ class MainActivity : AppCompatActivity() {
                 }
             }.build()
 
-            startHttpServer(this@MainActivity, androidServer)
+            startHttpServer(this@MainActivity, androidServer!!)
             LocalNotificationHelper.justShowOneDefault(
                 this@MainActivity,
                 "Server",
@@ -226,9 +263,9 @@ class MainActivity : AppCompatActivity() {
     }
 
     override fun onDestroy() {
-        androidServer.close()
+        androidServer?.close()
         // todo: 6969没关闭
-        stopService(Intent(this@MainActivity, AndServerService::class.java))
+//        stopService(Intent(this@MainActivity, AndServerService::class.java))
         super.onDestroy()
     }
 }
